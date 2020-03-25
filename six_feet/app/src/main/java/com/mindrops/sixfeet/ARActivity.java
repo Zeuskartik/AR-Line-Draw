@@ -58,7 +58,10 @@ public class ARActivity extends AppCompatActivity {
     private boolean isTracking;
     private boolean isHitting;
     private boolean firstPointReceived = false;
+    private Color yellowLineColor = new Color(238.00f / 255.00f, 189.00f / 255.00f, 15.00f / 255.00f);
+    private Color greenLineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
     private Color lineColor;
+    double currentDistance = 0.0;
 
 
     @Override
@@ -169,34 +172,33 @@ public class ARActivity extends AppCompatActivity {
             calculateDistanceInMeters(point1, point2);
             final Vector3 difference = Vector3.subtract(point2, point1);
             final Vector3 directionFromTopToBottom = difference.normalized();
-            final Quaternion rotationFromAToB =
-                    Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
-            MaterialFactory.makeTransparentWithColor(this, lineColor)
-                    .thenAccept(
-                            material -> {
-                                if (lineNode == null) {
-                                    lineNode = new Node();
-                                    endPointNode = new Node();
-                                } else {
-                                    lastAnchorNode.removeChild(endPointNode);
-                                    lastAnchorNode.removeChild(lineNode);
-                                }
-                                lineNode.setParent(anchorNode);
-                                endPointNode.setParent(anchorNode);
-                                lineNode.setRenderable(getModel(material, difference));
-                                createPoint(endPointNode);
-                                lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
-                                //For Cubical line
-                                lineNode.setWorldRotation(rotationFromAToB);
-                                //For cylinderical line
+            final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
+            if (currentDistance < 1.8400) {
+                MaterialFactory.makeTransparentWithColor(this, lineColor)
+                        .thenAccept(
+                                material -> {
+                                    if (lineNode == null) {
+                                        lineNode = new Node();
+                                        endPointNode = new Node();
+                                    } else {
+                                        lastAnchorNode.removeChild(endPointNode);
+                                        lastAnchorNode.removeChild(lineNode);
+                                    }
+                                    lineNode.setParent(anchorNode);
+                                    endPointNode.setParent(anchorNode);
+                                    lineNode.setRenderable(getModel(material, difference));
+                                    createPoint(endPointNode);
+                                    lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
+                                    //For Cubical line
+                                    lineNode.setWorldRotation(rotationFromAToB);
+                                    //For cylinderical line
                                 /*lineNode.setWorldRotation(Quaternion.multiply(rotationFromAToB,
                                         Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90)));*/
-                            }
-                    );
-            lastAnchorNode = anchorNode;
+                                }
+                        );
+                lastAnchorNode = anchorNode;
+            }
         }
-
-
     }
 
     private void calculateDistanceInMeters(Vector3 point1, Vector3 point2) {
@@ -208,6 +210,12 @@ public class ARActivity extends AppCompatActivity {
         /*if(distanceFormatted.equals("1.8288")){
             lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
         }*/
+        currentDistance = dist;
+        if(currentDistance < 1.8288){
+            lineColor = yellowLineColor;
+        }else {
+            lineColor = greenLineColor;
+        }
         distanceTv.setText(distanceFormatted + "m");
     }
 
