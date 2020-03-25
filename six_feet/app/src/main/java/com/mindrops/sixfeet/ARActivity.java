@@ -86,6 +86,7 @@ public class ARActivity extends AppCompatActivity {
             arFragment.getArSceneView().getPlaneRenderer().setVisible(false);
             arFragment.getArSceneView().getScene().addOnUpdateListener(this::onFrameDetected);
         }
+//commented
     }
 
     private void onFrameDetected(FrameTime frameTime) {
