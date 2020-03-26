@@ -1,32 +1,27 @@
 package com.mindrops.sixfeet;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Display;
-import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.Camera;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.Scene;
-import com.google.ar.sceneform.collision.Ray;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
@@ -36,14 +31,13 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.ux.ArFragment;
-import com.google.ar.sceneform.ux.BaseArFragment;
+import com.google.ar.sceneform.ux.PlaneDiscoveryController;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 
-public class ARActivity extends AppCompatActivity {
+public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListener {
     private ArFragment arFragment;
     private Config config;
     private FrameLayout targetLayout;
@@ -62,6 +56,9 @@ public class ARActivity extends AppCompatActivity {
     private Color greenLineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
     private Color lineColor;
     double currentDistance = 0.0;
+    boolean sixFeetCovered = false;
+    Button resetBtn;
+    Session mSession;
 
 
     @Override
@@ -71,10 +68,72 @@ public class ARActivity extends AppCompatActivity {
         targetLayout = findViewById(R.id.target_button);
         startButtonLayout = findViewById(R.id.start_button);
         distanceTv = findViewById(R.id.distance_tv);
-        lineColor = new Color(238.00f / 255.00f, 189.00f / 255.00f, 15.00f / 255.00f);
+        lineColor = yellowLineColor;
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.arFragment);
+        resetBtn = findViewById(R.id.reset_btn);
 
 
+        resetBtn.setOnClickListener(v -> {
+/*            firstAnchorNode.getChildren().clear();
+            lastAnchorNode.getChildren().clear();*/
+
+            try {
+
+
+                if(firstAnchorNode != null) {
+                    arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
+
+                    arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
+                    firstAnchorNode = null;
+                    firstPointReceived = false;
+
+                    lineNode.setRenderable(null);
+                    lastAnchorNode.removeChild(lineNode);
+                    lineNode = null;
+                    endPointNode.setRenderable(null);
+                    lastAnchorNode.removeChild(endPointNode);
+                    endPointNode = null;
+
+                    arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
+                    lastAnchorNode = null;
+
+                    this.showControls();
+
+
+                }
+
+               /*
+               arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
+                if(firstAnchorNode != null) {
+                    arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
+                }
+                if(lastAnchorNode != null) {
+                    arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
+                }*/
+//                onPause();
+//                onResume();
+//                hideControls(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("##### Exception -->  ","exception occurred");
+            }
+            /*AnchorNode hitNodeAnchor = (AnchorNode) hitNode;
+            if (hitNodeAnchor != null) {
+                hitNode.getAnchor().detach();
+            }
+            hitNode.setParent(null);
+            hitNode = null;*/
+
+            /*hideControls(true);
+            arFragment.getArSceneView().getScene().addOnUpdateListener(this::onFrameDetected);*/
+        });
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        arFragment = null;
     }
 
     @Override
@@ -85,11 +144,11 @@ public class ARActivity extends AppCompatActivity {
 
     private void initArFragment() {
         if (arFragment != null) {
-            hideControls(true);
             arFragment.getArSceneView().getPlaneRenderer().setVisible(false);
-            arFragment.getArSceneView().getScene().addOnUpdateListener(this::onFrameDetected);
+            hideControls(true);
+
         }
-//commented
+
     }
 
     private void onFrameDetected(FrameTime frameTime) {
@@ -122,8 +181,6 @@ public class ARActivity extends AppCompatActivity {
         for (Plane p : planes) {
             if (p.getTrackingState() == TrackingState.TRACKING) {
                 isTracking = true;
-
-                /* break;*/
             } else {
                 isTracking = false;
             }
@@ -147,7 +204,6 @@ public class ARActivity extends AppCompatActivity {
                     hitAnchor = hit.createAnchor();
                     if (firstPointReceived && isTracking) {
                         placePointsOnScreen(hit.createAnchor());
-
                     }
                     break;
                 }
@@ -173,7 +229,7 @@ public class ARActivity extends AppCompatActivity {
             final Vector3 difference = Vector3.subtract(point2, point1);
             final Vector3 directionFromTopToBottom = difference.normalized();
             final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
-            if (currentDistance < 1.8400) {
+            if (currentDistance < 1.8400 && !sixFeetCovered) {
                 MaterialFactory.makeTransparentWithColor(this, lineColor)
                         .thenAccept(
                                 material -> {
@@ -191,8 +247,8 @@ public class ARActivity extends AppCompatActivity {
                                     lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
                                     //For Cubical line
                                     lineNode.setWorldRotation(rotationFromAToB);
-                                    //For cylinderical line
-                                /*lineNode.setWorldRotation(Quaternion.multiply(rotationFromAToB,
+                                    //For cylindrical line
+                                    /*lineNode.setWorldRotation(Quaternion.multiply(rotationFromAToB,
                                         Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90)));*/
                                 }
                         );
@@ -211,10 +267,11 @@ public class ARActivity extends AppCompatActivity {
             lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
         }*/
         currentDistance = dist;
-        if(currentDistance < 1.8288){
+        if (currentDistance < 1.8288) {
             lineColor = yellowLineColor;
-        }else {
+        } else {
             lineColor = greenLineColor;
+            sixFeetCovered = true;
         }
         distanceTv.setText(distanceFormatted + "m");
     }
@@ -240,6 +297,7 @@ public class ARActivity extends AppCompatActivity {
         distanceTv.setVisibility(View.VISIBLE);
         arFragment.getPlaneDiscoveryController().hide();
         //disablePlaneDiscovery();
+        arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         targetLayout.setVisibility(View.VISIBLE);
         startButtonLayout.setVisibility(View.VISIBLE);
         startButtonLayout.setOnClickListener(v -> {
@@ -272,6 +330,7 @@ public class ARActivity extends AppCompatActivity {
             distanceTv.setVisibility(View.GONE);
             //enablePlaneDiscovery();
         }
+        arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         targetLayout.setVisibility(View.GONE);
         startButtonLayout.setVisibility(View.GONE);
         startButtonLayout.setOnClickListener(null);
@@ -291,5 +350,10 @@ public class ARActivity extends AppCompatActivity {
             config.setPlaneFindingMode(Config.PlaneFindingMode.DISABLED);
             arFragment.getArSceneView().getSession().configure(config);
         }
+    }
+
+    @Override
+    public void onUpdate(FrameTime frameTime) {
+        onFrameDetected(frameTime);
     }
 }
