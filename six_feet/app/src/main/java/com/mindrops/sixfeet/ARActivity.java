@@ -46,7 +46,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private Anchor hitAnchor;
     private AnchorNode firstAnchorNode;
     private AnchorNode lastAnchorNode;
-    private Node initNode;
     private Node lineNode;
     private Node endPointNode;
     private boolean isTracking;
@@ -80,7 +79,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             try {
 
 
-                if(firstAnchorNode != null) {
+                if (firstAnchorNode != null) {
                     arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
 
                     arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
@@ -97,7 +96,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                     arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
                     lastAnchorNode = null;
 
-                    this.showControls();
+                    this.showControls(true);
 
 
                 }
@@ -115,7 +114,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 //                hideControls(false);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("##### Exception -->  ","exception occurred");
+                Log.d("##### Exception -->  ", "exception occurred");
             }
             /*AnchorNode hitNodeAnchor = (AnchorNode) hitNode;
             if (hitNodeAnchor != null) {
@@ -156,7 +155,11 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         View contentView = findViewById(android.R.id.content);
         if (trackingChanged) {
             if (isTracking) {
-                new Handler().postDelayed(this::showControls, 1000);
+                new Handler().postDelayed(
+                        () -> {
+                            showControls(false);
+                        }, 1000
+                );
             } else {
                 hideControls(true);
             }
@@ -293,11 +296,13 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     }
 
 
-    public void showControls() {
+    public void showControls(Boolean shouldInitListener) {
         distanceTv.setVisibility(View.VISIBLE);
         arFragment.getPlaneDiscoveryController().hide();
         //disablePlaneDiscovery();
-        arFragment.getArSceneView().getScene().addOnUpdateListener(this);
+        if (shouldInitListener) {
+            arFragment.getArSceneView().getScene().addOnUpdateListener(this);
+        }
         targetLayout.setVisibility(View.VISIBLE);
         startButtonLayout.setVisibility(View.VISIBLE);
         startButtonLayout.setOnClickListener(v -> {
