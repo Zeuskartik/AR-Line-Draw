@@ -6,9 +6,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Config;
@@ -40,8 +42,7 @@ import java.util.List;
 public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListener {
     private ArFragment arFragment;
     private Config config;
-    private FrameLayout targetLayout;
-    private FrameLayout startButtonLayout;
+    private ImageView startButtonLayout, targetLayout;
     private TextView distanceTv;
     private Anchor hitAnchor;
     private AnchorNode firstAnchorNode;
@@ -56,7 +57,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private Color lineColor;
     double currentDistance = 0.0;
     boolean sixFeetCovered = false;
-    Button resetBtn;
+    TextView resetBtn;
+    CardView distanceCv;
     Session mSession;
 
 
@@ -68,6 +70,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         startButtonLayout = findViewById(R.id.start_button);
         distanceTv = findViewById(R.id.distance_tv);
         lineColor = yellowLineColor;
+        distanceCv = findViewById(R.id.ditanceCv);
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.arFragment);
         resetBtn = findViewById(R.id.reset_btn);
 
@@ -100,17 +103,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
                 }
 
-               /*
-               arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
-                if(firstAnchorNode != null) {
-                    arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
-                }
-                if(lastAnchorNode != null) {
-                    arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
-                }*/
-//                onPause();
-//                onResume();
-//                hideControls(false);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.d("##### Exception -->  ", "exception occurred");
@@ -124,6 +116,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
             /*hideControls(true);
             arFragment.getArSceneView().getScene().addOnUpdateListener(this::onFrameDetected);*/
+            resetBtn.setVisibility(View.GONE);
+            distanceCv.setVisibility(View.GONE);
         });
 
     }
@@ -221,7 +215,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         AnchorNode anchorNode = new AnchorNode(anchor);
         hideControls(false);
         if (firstPointReceived ) {
-            resetBtn.setVisibility(View.VISIBLE);
             anchorNode.setParent(arFragment.getArSceneView().getScene());
             Vector3 point1, point2;
             point1 = firstAnchorNode.getWorldPosition();
@@ -266,7 +259,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         float dy = point2.y - point1.y;
         float dz = point2.z - point1.z;
         float dist = (float) (Math.sqrt((dx * dx + dy * dy + dz * dz)));
-        String distanceFormatted = String.format("%.4f", dist);
+        String distanceFormatted = String.format("%.2f", dist);
         /*if(distanceFormatted.equals("1.8288")){
             lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
         }*/
@@ -276,7 +269,9 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         } else {
             lineColor = greenLineColor;
         }
-        distanceTv.setText(distanceFormatted + "m");
+        if(!sixFeetCovered) {
+            distanceTv.setText(distanceFormatted + "m");
+        }
     }
 
     private Renderable getModel(Material material, Vector3 difference) {
@@ -307,7 +302,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         startButtonLayout.setVisibility(View.VISIBLE);
         startButtonLayout.setOnClickListener(v -> {
             createFirstAnchor(hitAnchor);
-            resetBtn.setVisibility(View.GONE);
+            resetBtn.setVisibility(View.VISIBLE);
+            distanceCv.setVisibility(View.VISIBLE);
         });
     }
 
@@ -337,7 +333,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         targetLayout.setVisibility(View.GONE);
         startButtonLayout.setVisibility(View.GONE);
-        startButtonLayout.setOnClickListener(null);
     }
 
     private void enablePlaneDiscovery() {
