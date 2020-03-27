@@ -42,8 +42,8 @@ import java.util.List;
 public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListener {
     private ArFragment arFragment;
     private Config config;
-    private ImageView startButtonLayout, targetLayout;
-    private TextView distanceTv;
+    private ImageView targetLayout;
+    private TextView distanceTv, startButtonLayout;
     private Anchor hitAnchor;
     private AnchorNode firstAnchorNode;
     private AnchorNode lastAnchorNode;
@@ -269,14 +269,19 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
         }*/
         currentDistance = dist;
-        if (currentDistance < 1.8288) {
+        if (currentDistance < 2.0) {
             lineColor = yellowLineColor;
         } else {
             lineColor = greenLineColor;
         }
         if(!sixFeetCovered) {
             distanceTv.setText(distanceFormatted + "m");
+            showPopup();
         }
+    }
+
+    private void showPopup() {
+
     }
 
     private Renderable getModel(Material material, Vector3 difference) {
