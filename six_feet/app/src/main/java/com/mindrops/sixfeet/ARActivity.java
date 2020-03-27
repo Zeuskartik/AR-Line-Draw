@@ -98,7 +98,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
                     this.showControls(true);
 
-
                 }
 
                /*
@@ -132,7 +131,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     @Override
     protected void onPause() {
         super.onPause();
-        arFragment = null;
     }
 
     @Override
@@ -145,7 +143,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         if (arFragment != null) {
             arFragment.getArSceneView().getPlaneRenderer().setVisible(false);
             hideControls(true);
-
         }
 
     }
@@ -223,7 +220,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private void placePointsOnScreen(Anchor anchor) {
         AnchorNode anchorNode = new AnchorNode(anchor);
         hideControls(false);
-        if (firstPointReceived) {
+        if (firstPointReceived ) {
+            resetBtn.setVisibility(View.VISIBLE);
             anchorNode.setParent(arFragment.getArSceneView().getScene());
             Vector3 point1, point2;
             point1 = firstAnchorNode.getWorldPosition();
@@ -232,7 +230,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             final Vector3 difference = Vector3.subtract(point2, point1);
             final Vector3 directionFromTopToBottom = difference.normalized();
             final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
-            if (currentDistance < 1.8400 && !sixFeetCovered) {
+            if (currentDistance < 1.8400 & !sixFeetCovered) {
                 MaterialFactory.makeTransparentWithColor(this, lineColor)
                         .thenAccept(
                                 material -> {
@@ -253,6 +251,9 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                     //For cylindrical line
                                     /*lineNode.setWorldRotation(Quaternion.multiply(rotationFromAToB,
                                         Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90)));*/
+                                    if(lineColor.equals(greenLineColor)){
+                                        sixFeetCovered = true;
+                                    }
                                 }
                         );
                 lastAnchorNode = anchorNode;
@@ -274,7 +275,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             lineColor = yellowLineColor;
         } else {
             lineColor = greenLineColor;
-            sixFeetCovered = true;
         }
         distanceTv.setText(distanceFormatted + "m");
     }
@@ -286,9 +286,9 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 Vector3.zero(), material);
         model.setShadowCaster(false);
         model.setShadowReceiver(false);
+
         //Cyliderical line
-       /* ModelRenderable model = ShapeFactory.makeCylinder(0.005f, difference.length(),
-                new Vector3(0f, difference.length() / 2, 0f), material);
+       /* ModelRenderable model = ShapeFactory.makeCylinder(0.005f, difference.length(), new Vector3(0f, difference.length() / 2, 0f), material);
         model.setShadowCaster(false);
         model.setShadowReceiver(false);*/
 
@@ -307,8 +307,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         startButtonLayout.setVisibility(View.VISIBLE);
         startButtonLayout.setOnClickListener(v -> {
             createFirstAnchor(hitAnchor);
+            resetBtn.setVisibility(View.GONE);
         });
-
     }
 
     private void createPoint(Node node) {
@@ -319,7 +319,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             node.setRenderable(modelRenderable);
         });
     }
-
 
     private void createFirstAnchor(Anchor hitAnchor) {
         hideControls(false);
