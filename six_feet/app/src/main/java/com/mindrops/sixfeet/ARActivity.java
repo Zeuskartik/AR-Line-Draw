@@ -85,6 +85,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 if (firstAnchorNode != null) {
                     arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
 
+                    firstAnchorNode.setRenderable(null);
                     arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
                     firstAnchorNode = null;
                     firstPointReceived = false;
@@ -92,10 +93,12 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                     lineNode.setRenderable(null);
                     lastAnchorNode.removeChild(lineNode);
                     lineNode = null;
+
                     endPointNode.setRenderable(null);
                     lastAnchorNode.removeChild(endPointNode);
                     endPointNode = null;
 
+                    lastAnchorNode.setRenderable(null);
                     arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
                     lastAnchorNode = null;
 
@@ -118,6 +121,9 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             arFragment.getArSceneView().getScene().addOnUpdateListener(this::onFrameDetected);*/
             resetBtn.setVisibility(View.GONE);
             distanceCv.setVisibility(View.GONE);
+            sixFeetCovered = false;
+            lineColor = yellowLineColor;
+            this.showControls(true);
         });
 
     }
@@ -168,8 +174,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private boolean updateTracking() {
         Frame frame = arFragment.getArSceneView().getArFrame();
         boolean wasTracking = isTracking;
-        /*isTracking = frame != null &&
-                frame.getCamera().getTrackingState() == TrackingState.TRACKING;*/
+        /*isTracking = frame != null && frame.getCamera().getTrackingState() == TrackingState.TRACKING;*/
         assert frame != null;
         Collection<Plane> planes = frame.getUpdatedTrackables(Plane.class);
         for (Plane p : planes) {
