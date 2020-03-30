@@ -28,7 +28,6 @@ import com.google.ar.sceneform.rendering.Material;
 import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
-import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.ux.ArFragment;
 
 import java.util.Collection;
@@ -231,11 +230,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                     lineNode.setRenderable(getModel(material, difference));
                                     createPoint(endPointNode);
                                     lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
-                                    //For Cubical line
                                     lineNode.setWorldRotation(rotationFromAToB);
-                                    //For cylindrical line
-                                    /*lineNode.setWorldRotation(Quaternion.multiply(rotationFromAToB,
-                                        Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90)));*/
                                     if (lineColor.equals(greenLineColor)) {
                                         sixFeetCovered = true;
                                     }
@@ -273,7 +268,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
     private Renderable getModel(Material material, Vector3 difference) {
         //Cubical line
-        ModelRenderable model = ShapeFactory.makeCube(
+        ModelRenderable model = CustomShapeFactory.createCube(
                 new Vector3(.01f, .01f, difference.length()),
                 Vector3.zero(), material);
         model.setShadowCaster(false);
@@ -291,7 +286,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     public void showControls(Boolean shouldInitListener) {
         distanceTv.setVisibility(View.VISIBLE);
         arFragment.getPlaneDiscoveryController().hide();
-        disablePlaneDiscovery();
+        //disablePlaneDiscovery();
         if (shouldInitListener) {
             arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         }
@@ -305,12 +300,12 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     }
 
     private void createPoint(Node node) {
-        MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
+        /*MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
             ModelRenderable modelRenderable = ShapeFactory.makeSphere(0.008f, new Vector3(0f, 0f, 0f), material);
             modelRenderable.setShadowCaster(false);
             modelRenderable.setShadowReceiver(false);
             node.setRenderable(modelRenderable);
-        });
+        });*/
     }
 
     private void createFirstAnchor(Anchor hitAnchor) {
@@ -325,7 +320,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         if (showPlaneDiscovery) {
             arFragment.getPlaneDiscoveryController().show();
             distanceTv.setVisibility(View.GONE);
-            enablePlaneDiscovery();
+            //enablePlaneDiscovery();
         }
         arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         targetLayout.setVisibility(View.GONE);
@@ -352,4 +347,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     public void onUpdate(FrameTime frameTime) {
         onFrameDetected(frameTime);
     }
+
+
 }
