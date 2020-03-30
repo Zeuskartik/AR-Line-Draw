@@ -291,7 +291,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     public void showControls(Boolean shouldInitListener) {
         distanceTv.setVisibility(View.VISIBLE);
         arFragment.getPlaneDiscoveryController().hide();
-        //disablePlaneDiscovery();
+        disablePlaneDiscovery();
         if (shouldInitListener) {
             arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         }
@@ -325,7 +325,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         if (showPlaneDiscovery) {
             arFragment.getPlaneDiscoveryController().show();
             distanceTv.setVisibility(View.GONE);
-            //enablePlaneDiscovery();
+            enablePlaneDiscovery();
         }
         arFragment.getArSceneView().getScene().addOnUpdateListener(this);
         targetLayout.setVisibility(View.GONE);
