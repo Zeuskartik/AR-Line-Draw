@@ -59,7 +59,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     boolean sixFeetCovered = false;
     TextView resetBtn;
     CardView distanceCv;
-    Session mSession;
 
 
     @Override
@@ -102,6 +101,11 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                     arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
                     lastAnchorNode = null;
 
+                    resetBtn.setVisibility(View.GONE);
+                    distanceCv.setVisibility(View.GONE);
+                    sixFeetCovered = false;
+                    lineColor = yellowLineColor;
+
                     this.showControls(true);
 
                 }
@@ -110,20 +114,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 e.printStackTrace();
                 Log.d("##### Exception -->  ", "exception occurred");
             }
-            /*AnchorNode hitNodeAnchor = (AnchorNode) hitNode;
-            if (hitNodeAnchor != null) {
-                hitNode.getAnchor().detach();
-            }
-            hitNode.setParent(null);
-            hitNode = null;*/
-
-            /*hideControls(true);
-            arFragment.getArSceneView().getScene().addOnUpdateListener(this::onFrameDetected);*/
-            resetBtn.setVisibility(View.GONE);
-            distanceCv.setVisibility(View.GONE);
-            sixFeetCovered = false;
-            lineColor = yellowLineColor;
-            this.showControls(true);
         });
 
     }
@@ -219,7 +209,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private void placePointsOnScreen(Anchor anchor) {
         AnchorNode anchorNode = new AnchorNode(anchor);
         hideControls(false);
-        if (firstPointReceived ) {
+        if (firstPointReceived) {
             anchorNode.setParent(arFragment.getArSceneView().getScene());
             Vector3 point1, point2;
             point1 = firstAnchorNode.getWorldPosition();
@@ -249,7 +239,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                     //For cylindrical line
                                     /*lineNode.setWorldRotation(Quaternion.multiply(rotationFromAToB,
                                         Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90)));*/
-                                    if(lineColor.equals(greenLineColor)){
+                                    if (lineColor.equals(greenLineColor)) {
                                         sixFeetCovered = true;
                                     }
                                 }
@@ -274,7 +264,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         } else {
             lineColor = greenLineColor;
         }
-        if(!sixFeetCovered) {
+        if (!sixFeetCovered) {
             distanceTv.setText(distanceFormatted + "m");
             showPopup();
         }

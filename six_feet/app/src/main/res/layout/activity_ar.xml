@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/arFragment"
-        android:name="com.mindrops.sixfeet.CustomArFragemnt"
+        android:name="com.mindrops.sixfeet.CustomArFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
