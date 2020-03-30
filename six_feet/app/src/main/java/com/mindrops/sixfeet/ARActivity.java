@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,7 +15,6 @@ import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
@@ -33,7 +30,6 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.ux.ArFragment;
-import com.google.ar.sceneform.ux.PlaneDiscoveryController;
 
 import java.util.Collection;
 import java.util.List;
@@ -80,7 +76,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
             try {
 
-
                 if (firstAnchorNode != null) {
                     arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
 
@@ -88,32 +83,34 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                     arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
                     firstAnchorNode = null;
                     firstPointReceived = false;
-
+                }
+                if (lineNode != null) {
                     lineNode.setRenderable(null);
                     lastAnchorNode.removeChild(lineNode);
                     lineNode = null;
-
+                }
+                if (endPointNode != null) {
                     endPointNode.setRenderable(null);
                     lastAnchorNode.removeChild(endPointNode);
                     endPointNode = null;
-
+                }
+                if (lastAnchorNode != null) {
                     lastAnchorNode.setRenderable(null);
                     arFragment.getArSceneView().getScene().removeChild(lastAnchorNode);
                     lastAnchorNode = null;
-
-                    resetBtn.setVisibility(View.GONE);
-                    distanceCv.setVisibility(View.GONE);
-                    sixFeetCovered = false;
-                    lineColor = yellowLineColor;
-
-                    this.showControls(true);
-
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.d("##### Exception -->  ", "exception occurred");
             }
+            resetBtn.setVisibility(View.GONE);
+            distanceCv.setVisibility(View.GONE);
+            sixFeetCovered = false;
+            lineColor = yellowLineColor;
+
+            this.showControls(true);
+
         });
 
     }
@@ -218,7 +215,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             final Vector3 difference = Vector3.subtract(point2, point1);
             final Vector3 directionFromTopToBottom = difference.normalized();
             final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
-            if (currentDistance < 1.8400 & !sixFeetCovered) {
+            if (currentDistance < 2.0 & !sixFeetCovered) {
                 MaterialFactory.makeTransparentWithColor(this, lineColor)
                         .thenAccept(
                                 material -> {
@@ -259,7 +256,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
         }*/
         currentDistance = dist;
-        if (currentDistance < 2.0) {
+        if (currentDistance < 1.98888 ) {
             lineColor = yellowLineColor;
         } else {
             lineColor = greenLineColor;
