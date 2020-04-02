@@ -38,7 +38,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private ArFragment arFragment;
     private Config config;
     private ImageView targetLayout;
-    private TextView distanceTv, startButtonLayout;
+    private TextView distanceTv, startButtonLayout, warningTv;
     private Anchor hitAnchor;
     private AnchorNode firstAnchorNode;
     private AnchorNode lastAnchorNode;
@@ -53,6 +53,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     double currentDistance = 0.0;
     boolean sixFeetCovered = false;
     TextView resetBtn;
+    String distanceFormatted;
     CardView distanceCv;
 
 
@@ -62,6 +63,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         setContentView(R.layout.activity_ar);
         targetLayout = findViewById(R.id.target_button);
         startButtonLayout = findViewById(R.id.start_button);
+        warningTv = findViewById(R.id.warning_tv);
         distanceTv = findViewById(R.id.distance_tv);
         lineColor = yellowLineColor;
         distanceCv = findViewById(R.id.ditanceCv);
@@ -105,6 +107,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             }
             resetBtn.setVisibility(View.GONE);
             distanceCv.setVisibility(View.GONE);
+            warningTv.setVisibility(View.GONE);
             sixFeetCovered = false;
             lineColor = yellowLineColor;
 
@@ -127,7 +130,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
     private void initArFragment() {
         if (arFragment != null) {
-            arFragment.getArSceneView().getPlaneRenderer().setVisible(false);
+            arFragment.getArSceneView().getPlaneRenderer().setVisible(true);
             hideControls(true);
         }
 
@@ -183,13 +186,15 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             hits = frame.hitTest(pt.x, pt.y);
             for (HitResult hit : hits) {
                 Trackable trackable = hit.getTrackable();
-                if (trackable instanceof Plane &&
-                        ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
+                if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
+
                     isHitting = true;
                     hitAnchor = hit.createAnchor();
+
                     if (firstPointReceived && isTracking) {
                         placePointsOnScreen(hit.createAnchor());
                     }
+
                     break;
                 }
             }
@@ -214,7 +219,23 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             final Vector3 difference = Vector3.subtract(point2, point1);
             final Vector3 directionFromTopToBottom = difference.normalized();
             final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
-            if (currentDistance < 2.0 & !sixFeetCovered) {
+            if (!sixFeetCovered) {
+
+                if(currentDistance < 2.0 ) {
+                    warningTv.setVisibility(View.GONE);
+                    lineColor = yellowLineColor;
+                } else {
+                    if (currentDistance > 2.010000 && !sixFeetCovered) {
+                        warningTv.setVisibility(View.VISIBLE);
+                    }else {
+                        warningTv.setVisibility(View.GONE);
+                    }
+                }
+                if(currentDistance >= 1.9999 && currentDistance >= 2.009999 ){
+                    lineColor = greenLineColor;
+                }
+
+
                 MaterialFactory.makeTransparentWithColor(this, lineColor)
                         .thenAccept(
                                 material -> {
@@ -233,10 +254,13 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                     lineNode.setWorldRotation(rotationFromAToB);
                                     if (lineColor.equals(greenLineColor)) {
                                         sixFeetCovered = true;
+                                        warningTv.setVisibility(View.GONE);
                                     }
                                 }
                         );
                 lastAnchorNode = anchorNode;
+
+                distanceTv.setText(distanceFormatted + "m");
             }
         }
     }
@@ -246,38 +270,24 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         float dy = point2.y - point1.y;
         float dz = point2.z - point1.z;
         float dist = (float) (Math.sqrt((dx * dx + dy * dy + dz * dz)));
-        String distanceFormatted = String.format("%.2f", dist);
+        distanceFormatted = String.format("%.2f", dist);
         /*if(distanceFormatted.equals("1.8288")){
             lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
         }*/
         currentDistance = dist;
-        if (currentDistance < 1.98888 ) {
-            lineColor = yellowLineColor;
-        } else {
-            lineColor = greenLineColor;
-        }
-        if (!sixFeetCovered) {
-            distanceTv.setText(distanceFormatted + "m");
-            showPopup();
-        }
     }
 
     private void showPopup() {
-
     }
 
     private Renderable getModel(Material material, Vector3 difference) {
         //Cubical line
-        ModelRenderable model = CustomShapeFactory.createCube(
+        ModelRenderable model = CustomShapeFactory.createCube(/*0.008f,*/
                 new Vector3(.01f, .01f, difference.length()),
                 Vector3.zero(), material);
+
         model.setShadowCaster(false);
         model.setShadowReceiver(false);
-
-        //Cyliderical line
-       /* ModelRenderable model = ShapeFactory.makeCylinder(0.005f, difference.length(), new Vector3(0f, difference.length() / 2, 0f), material);
-        model.setShadowCaster(false);
-        model.setShadowReceiver(false);*/
 
         return model;
     }
@@ -301,7 +311,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
     private void createPoint(Node node) {
         /*MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
-            ModelRenderable modelRenderable = ShapeFactory.makeSphere(0.008f, new Vector3(0f, 0f, 0f), material);
+            ModelRenderable modelRenderable = CustomShapeFactory.createSphere(0.008f, new Vector3(0f, 0f, 0f), material);
             modelRenderable.setShadowCaster(false);
             modelRenderable.setShadowReceiver(false);
             node.setRenderable(modelRenderable);
