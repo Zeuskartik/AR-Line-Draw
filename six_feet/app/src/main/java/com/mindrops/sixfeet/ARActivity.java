@@ -52,7 +52,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private Color lineColor;
     double currentDistance = 0.0;
     boolean sixFeetCovered = false;
-    TextView resetBtn;
+    TextView resetBtn, finishBtn, descrTv;
     String distanceFormatted;
     CardView distanceCv;
 
@@ -69,12 +69,10 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         distanceCv = findViewById(R.id.ditanceCv);
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.arFragment);
         resetBtn = findViewById(R.id.reset_btn);
-
+        finishBtn = findViewById(R.id.finish_btn);
+        descrTv = findViewById(R.id.descrText_Tv);
 
         resetBtn.setOnClickListener(v -> {
-/*            firstAnchorNode.getChildren().clear();
-            lastAnchorNode.getChildren().clear();*/
-
             try {
 
                 if (firstAnchorNode != null) {
@@ -106,8 +104,9 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 Log.d("##### Exception -->  ", "exception occurred");
             }
             resetBtn.setVisibility(View.GONE);
+            finishBtn.setVisibility(View.GONE);
             distanceCv.setVisibility(View.GONE);
-            warningTv.setVisibility(View.GONE);
+            descrTv.setVisibility(View.GONE);
             sixFeetCovered = false;
             lineColor = yellowLineColor;
 
@@ -219,23 +218,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             final Vector3 difference = Vector3.subtract(point2, point1);
             final Vector3 directionFromTopToBottom = difference.normalized();
             final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
-            if (!sixFeetCovered) {
-
-                if(currentDistance < 2.0 ) {
-                    warningTv.setVisibility(View.GONE);
-                    lineColor = yellowLineColor;
-                } else {
-                    if (currentDistance > 2.010000 && !sixFeetCovered) {
-                        warningTv.setVisibility(View.VISIBLE);
-                    }else {
-                        warningTv.setVisibility(View.GONE);
-                    }
-                }
-                if(currentDistance >= 1.9999 && currentDistance >= 2.009999 ){
-                    lineColor = greenLineColor;
-                }
-
-
+            if (currentDistance < 2.02 && !sixFeetCovered) {
                 MaterialFactory.makeTransparentWithColor(this, lineColor)
                         .thenAccept(
                                 material -> {
@@ -255,14 +238,21 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                     if (lineColor.equals(greenLineColor)) {
                                         sixFeetCovered = true;
                                         warningTv.setVisibility(View.GONE);
+                                        distanceTv.setText("2.0m");
+                                        showPopup();
                                     }
                                 }
                         );
                 lastAnchorNode = anchorNode;
-
-                distanceTv.setText(distanceFormatted + "m");
             }
         }
+    }
+
+    private void showPopup() {
+        distanceTv.setVisibility(View.GONE);
+        warningTv.setVisibility(View.GONE);
+        descrTv.setVisibility(View.VISIBLE);
+        finishBtn.setVisibility(View.VISIBLE);
     }
 
     private void calculateDistanceInMeters(Vector3 point1, Vector3 point2) {
@@ -270,15 +260,29 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         float dy = point2.y - point1.y;
         float dz = point2.z - point1.z;
         float dist = (float) (Math.sqrt((dx * dx + dy * dy + dz * dz)));
-        distanceFormatted = String.format("%.2f", dist);
-        /*if(distanceFormatted.equals("1.8288")){
-            lineColor = new Color(0.00f / 255.00f, 214.00f / 255.00f, 145.00f / 255.00f);
-        }*/
+        distanceFormatted = String.format("%.1f", dist);
+
         currentDistance = dist;
+
+        if (currentDistance < 1.98) {
+            lineColor = yellowLineColor;
+        } else if(currentDistance > 1.98 && currentDistance < 2.02){
+            lineColor = greenLineColor;
+        }
+
+        if(currentDistance > 2.02 && !sixFeetCovered){
+            warningTv.setVisibility(View.VISIBLE);
+        }else {
+            warningTv.setVisibility(View.GONE);
+        }
+
+        if (!sixFeetCovered && currentDistance < 2.02) {
+            distanceTv.setVisibility(View.VISIBLE);
+            distanceTv.setText(distanceFormatted + "m");
+        }
     }
 
-    private void showPopup() {
-    }
+
 
     private Renderable getModel(Material material, Vector3 difference) {
         //Cubical line

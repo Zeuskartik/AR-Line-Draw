@@ -55,6 +55,7 @@
                 android:paddingVertical="8dp"
                 android:paddingHorizontal="16dp"
                 android:text="0.0m"
+                android:visibility="gone"
                 android:textColor="@android:color/black"
                 android:textSize="20sp" />
         </LinearLayout>
@@ -87,6 +88,20 @@
         app:layout_constraintVertical_bias="0.83" />
 
     <TextView
+        android:id="@+id/descrText_Tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:textColor="#000000"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:text="You have reacehd 2 meters. before hitting 'Finish', please remeber to place a physical marker at the 2 meter point."
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/reset_btn"/>
+
+    <TextView
         android:id="@+id/reset_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -98,7 +113,23 @@
         android:textSize="16sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/finish_btn"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/finish_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="14dp"
+        android:text="Finish"
+        android:textColor="#ffffff"
+        android:background="#4CAF50"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/reset_btn"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
