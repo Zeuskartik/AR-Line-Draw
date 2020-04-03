@@ -33,6 +33,7 @@ import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.ux.ArFragment;
+import com.google.ar.sceneform.ux.TransformableNode;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,8 +47,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private Anchor hitAnchor;
     private AnchorNode firstAnchorNode;
     private AnchorNode lastAnchorNode;
-    private Node lineNode;
-    private Node endPointNode;
+    private AnchorNode lineNode;
+    private AnchorNode endPointNode;
     private boolean isTracking;
     private boolean isHitting;
     private boolean firstPointReceived = false;
@@ -113,8 +114,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             descrTv.setVisibility(View.GONE);
             sixFeetCovered = false;
             lineColor = yellowLineColor;
-
-            this.showControls(true);
+            new Handler().postDelayed(() -> showControls(true), 1500);
 
         });
 
@@ -147,7 +147,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 new Handler().postDelayed(
                         () -> {
                             showControls(false);
-                        }, 1000
+                        }, 1500
                 );
             } else {
                 hideControls(true);
@@ -219,20 +219,20 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
             final Vector3 directionFromTopToBottom = difference.normalized();
             final Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
             if (currentDistance < 2.02 && !sixFeetCovered) {
-                MaterialFactory.makeTransparentWithColor(this, lineColor)
+                MaterialFactory.makeOpaqueWithColor(this, lineColor)
                         .thenAccept(
                                 material -> {
                                     if (lineNode == null) {
-                                        lineNode = new Node();
-                                        endPointNode = new Node();
+                                        lineNode = new AnchorNode();
+                                        endPointNode = new AnchorNode();
                                     } else {
                                         lastAnchorNode.removeChild(endPointNode);
                                         lastAnchorNode.removeChild(lineNode);
                                     }
-                                    lineNode.setParent(anchorNode);
-                                    endPointNode.setParent(anchorNode);
                                     lineNode.setRenderable(getModel(material, difference));
+                                    lineNode.setParent(anchorNode);
                                     createPoint(endPointNode);
+                                    endPointNode.setParent(anchorNode);
                                     lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
                                     lineNode.setWorldRotation(rotationFromAToB);
                                     if (lineColor.equals(greenLineColor)) {
@@ -294,8 +294,8 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
     private Renderable getModel(Material material, Vector3 difference) {
         //Cubical line
-        ModelRenderable model = CustomShapeFactory.createCustomLine(0.09f,
-                new Vector3(.01f, .01f, difference.length()),
+        ModelRenderable model = CustomShapeFactory.createCustomLine(
+                new Vector3(.013f, .01f, difference.length()),
                 Vector3.zero(), material);
         model.setShadowCaster(false);
         model.setShadowReceiver(false);
@@ -321,12 +321,12 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     }
 
     private void createPoint(Node node) {
-        /*MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
-            ModelRenderable modelRenderable = CustomShapeFactory.createSphere(0.008f, new Vector3(0f, 0f, 0f), material);
+        MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
+            ModelRenderable modelRenderable = CustomShapeFactory.createPoint( new Vector3(0f, 0f, 0f), material);
             modelRenderable.setShadowCaster(false);
             modelRenderable.setShadowReceiver(false);
             node.setRenderable(modelRenderable);
-        });*/
+        });
     }
 
     private void createFirstAnchor(Anchor hitAnchor) {
