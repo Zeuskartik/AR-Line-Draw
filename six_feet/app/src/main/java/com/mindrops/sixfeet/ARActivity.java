@@ -166,11 +166,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         assert frame != null;
         Collection<Plane> planes = frame.getUpdatedTrackables(Plane.class);
         for (Plane p : planes) {
-            if (p.getTrackingState() == TrackingState.TRACKING) {
-                isTracking = true;
-            } else {
-                isTracking = false;
-            }
+            isTracking = p.getTrackingState() == TrackingState.TRACKING;
         }
         return isTracking != wasTracking;
     }
@@ -266,30 +262,28 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
         if (currentDistance < 1.98) {
             lineColor = yellowLineColor;
-        } else if(currentDistance > 1.98 && currentDistance < 2.02){
+        } else if (currentDistance > 1.98 && currentDistance < 2.02) {
             lineColor = greenLineColor;
         }
 
-        if(currentDistance > 2.02 && !sixFeetCovered){
+        if (currentDistance > 2.02 && !sixFeetCovered) {
             warningTv.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             warningTv.setVisibility(View.GONE);
         }
 
         if (!sixFeetCovered && currentDistance < 2.02) {
             distanceTv.setVisibility(View.VISIBLE);
-            distanceTv.setText(distanceFormatted + "m");
+            distanceTv.setText(String.format("%sm", distanceFormatted));
         }
     }
 
 
-
     private Renderable getModel(Material material, Vector3 difference) {
         //Cubical line
-        ModelRenderable model = CustomShapeFactory.createCube(/*0.008f,*/
+        ModelRenderable model = CustomShapeFactory.createCustomLine(0.09f,
                 new Vector3(.01f, .01f, difference.length()),
                 Vector3.zero(), material);
-
         model.setShadowCaster(false);
         model.setShadowReceiver(false);
 

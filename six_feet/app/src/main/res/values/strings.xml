@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">Six Feet</string>
-
-
-    <string name="limit_exceded">limit exceeded \nplease step back</string>
+    <string name="limit_exceded">Limit Exceeded! \nPlease move back.</string>
 </resources>
