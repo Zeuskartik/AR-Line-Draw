@@ -82,7 +82,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
 
                 if (firstAnchorNode != null) {
                     arFragment.getArSceneView().getScene().removeOnUpdateListener(this);
-
                     firstAnchorNode.setRenderable(null);
                     arFragment.getArSceneView().getScene().removeChild(firstAnchorNode);
                     firstAnchorNode = null;
@@ -299,7 +298,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 Vector3.zero(), material);
         model.setShadowCaster(false);
         model.setShadowReceiver(false);
-
         return model;
     }
 
