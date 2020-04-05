@@ -231,7 +231,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                     lineNode.setRenderable(getModel(material, difference));
                                     lineNode.setParent(anchorNode);
                                     createPoint(endPointNode);
-                                    endPointNode.setParent(anchorNode);
+                                    endPointNode.setParent(lineNode.getParent());
                                     lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
                                     lineNode.setWorldRotation(rotationFromAToB);
                                     if (lineColor.equals(greenLineColor)) {
