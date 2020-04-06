@@ -319,7 +319,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     }
 
     private void createPoint(Node node) {
-        MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
+        MaterialFactory.makeTransparentWithColor(getApplicationContext(), yellowLineColor).thenAccept(material -> {
             ModelRenderable modelRenderable = CustomShapeFactory.createPoint( new Vector3(0f, 0f, 0f), material);
             modelRenderable.setShadowCaster(false);
             modelRenderable.setShadowReceiver(false);
