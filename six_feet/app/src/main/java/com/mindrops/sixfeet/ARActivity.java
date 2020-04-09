@@ -232,12 +232,14 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                         lastAnchorNode.removeChild(endPointNode);
                                         lastAnchorNode.removeChild(lineNode);
                                     }
-                                    createPoint(firstPointNode, new Vector3(0F, 0F, -difference.z / 2F));
-                                    createPoint(endPointNode, new Vector3(0F, 0F, difference.z / 2F));
+                                    createPoint(firstPointNode, new Vector3(0F, 0F, -difference.length()/2F));
+                                    createPoint(endPointNode, new Vector3(0F, 0F, difference.length()/2F));
                                     firstPointNode.setParent(lineNode);
                                     endPointNode.setParent(lineNode);
                                     lineNode.setRenderable(getModel(material, difference));
                                     lineNode.setParent(anchorNode);
+                                    Vector3 abc = Vector3.add(point1, point2).scaled(.5f);
+                                    Log.e("Position","Line:"+abc.x+abc.y+abc.z);
                                     lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
                                     lineNode.setWorldRotation(rotationFromAToB);
                                     if (lineColor.equals(greenLineColor)) {
