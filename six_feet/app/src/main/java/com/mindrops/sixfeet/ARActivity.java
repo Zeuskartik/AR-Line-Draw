@@ -46,6 +46,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private TextView distanceTv, startButtonLayout, warningTv;
     private Anchor hitAnchor;
     private AnchorNode firstAnchorNode;
+    private AnchorNode firstPointNode;
     private AnchorNode lastAnchorNode;
     private AnchorNode lineNode;
     private AnchorNode endPointNode;
@@ -223,15 +224,20 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                                 material -> {
                                     if (lineNode == null) {
                                         lineNode = new AnchorNode();
+                                        firstPointNode = new AnchorNode();
                                         endPointNode = new AnchorNode();
+
                                     } else {
+                                        lastAnchorNode.removeChild(firstPointNode);
                                         lastAnchorNode.removeChild(endPointNode);
                                         lastAnchorNode.removeChild(lineNode);
                                     }
+                                    createPoint(firstPointNode, new Vector3(0F, 0F, -difference.z / 2F));
+                                    createPoint(endPointNode, new Vector3(0F, 0F, difference.z / 2F));
+                                    firstPointNode.setParent(lineNode);
+                                    endPointNode.setParent(lineNode);
                                     lineNode.setRenderable(getModel(material, difference));
                                     lineNode.setParent(anchorNode);
-                                    createPoint(endPointNode);
-                                    endPointNode.setParent(lineNode.getParent());
                                     lineNode.setWorldPosition(Vector3.add(point1, point2).scaled(.5f));
                                     lineNode.setWorldRotation(rotationFromAToB);
                                     if (lineColor.equals(greenLineColor)) {
@@ -245,6 +251,10 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                 lastAnchorNode = anchorNode;
             }
         }
+    }
+
+    private Vector3 getCenter(int i) {
+        return new Vector3(0f, 0f, 0f);
     }
 
     private void showPopup() {
@@ -318,9 +328,9 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         });
     }
 
-    private void createPoint(Node node) {
-        MaterialFactory.makeTransparentWithColor(getApplicationContext(), yellowLineColor).thenAccept(material -> {
-            ModelRenderable modelRenderable = CustomShapeFactory.createPoint( new Vector3(0f, 0f, 0f), material);
+    private void createPoint(Node node, Vector3 center) {
+        MaterialFactory.makeTransparentWithColor(getApplicationContext(), lineColor).thenAccept(material -> {
+            ModelRenderable modelRenderable = CustomShapeFactory.createPoint(center, material);
             modelRenderable.setShadowCaster(false);
             modelRenderable.setShadowReceiver(false);
             node.setRenderable(modelRenderable);
@@ -330,7 +340,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     private void createFirstAnchor(Anchor hitAnchor) {
         hideControls(false);
         firstAnchorNode = new AnchorNode(hitAnchor);
-        createPoint(firstAnchorNode);
         arFragment.getArSceneView().getScene().addChild(firstAnchorNode);
         firstPointReceived = true;
     }

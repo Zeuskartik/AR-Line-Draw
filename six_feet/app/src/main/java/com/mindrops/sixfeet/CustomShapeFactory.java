@@ -19,7 +19,7 @@ class CustomShapeFactory {
 
     static ModelRenderable createPoint(Vector3 center, Material material) {
         AndroidPreconditions.checkMinAndroidApiLevel();
-        float radius = 0.015F;
+        float radius = 0.010F;
         ArrayList<Vertex> vertices = new ArrayList<>();
         ArrayList<Vertex> lowerCapVertices = new ArrayList<>();
         ArrayList<Vertex> upperCapVertices = new ArrayList<>();
