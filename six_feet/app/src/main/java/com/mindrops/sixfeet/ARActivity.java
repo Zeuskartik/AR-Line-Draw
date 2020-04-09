@@ -253,10 +253,6 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         }
     }
 
-    private Vector3 getCenter(int i) {
-        return new Vector3(0f, 0f, 0f);
-    }
-
     private void showPopup() {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
