@@ -1,6 +1,7 @@
 package com.mindrops.sixfeet;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
